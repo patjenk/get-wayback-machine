@@ -10,14 +10,14 @@ classifiers = [
 ]
 
 setup(name='get_wayback_machine',
-      version='0.1.2',
+      version='0.1.3',
       description="Fetch a URL via the latest Wayback Machine Snapshot",
       long_description=long_description,
       long_description_content_type="text/markdown",
-      url='https://github.com/jfilter/get-wayback-machine',
+      url='https://github.com/patjenk/get-wayback-machine',
       author='Johannes Filter',
       author_email='hi@jfilter.de',
       license='MIT',
       packages=['get_wayback_machine'],
-      install_requires=['get_retries'],
+      install_requires=[],
       classifiers=classifiers)

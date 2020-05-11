@@ -1,1 +1,1 @@
-from .get import get
+from .get import check_availability

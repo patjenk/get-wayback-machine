@@ -1,25 +1,29 @@
-import get_retries
+from datetime import datetime
+import requests
 
 
-def get(url, **kwargs):
-    response = get_retries.get(
-        f"http://archive.org/wayback/available?url={url.split('?')[0]}", **{'max_backoff': 128, **kwargs})
+def check_availability(url_str, datetime_fetched=None):
+    """
+    Use the web api to see if a page is available.
 
-    if not response or response.status_code != 200:
-        return None
+    https://archive.org/help/wayback_api.php
+    """
+    wayback_url = "http://archive.org/wayback/available"
+    params = {
+        'url': url_str.split('?')[0],
+    }
+    if datetime_fetched is not None:
+        params['timestamp'] = datetime_fetched.strftime("%Y%m%d%H%M%S")
 
+    response = requests.get(wayback_url, params=params, timeout=30)
     r_json = response.json()
 
-    if not 'closest' in r_json['archived_snapshots']:
-        return None
+    # let's be nice and convert the returned timestamp to a datetime obj
+    # wayback timestamps are in the form YYYYMMDDhhmmss
+    if "archived_snapshots" in r_json and \
+       "closest" in r_json['archived_snapshots'] and \
+       "timestamp" in r_json['archived_snapshots']['closest']:
+           wb_timestamp = r_json['archived_snapshots']['closest']['timestamp']
+           r_json['archived_snapshots']['closest']['datetime'] = datetime.strptime(wb_timestamp, "%Y%m%d%H%M%S")
 
-    clo = r_json['archived_snapshots']['closest']
-    if clo['status'] != '200':
-        return None
-
-    response_final = get_retries.get(
-        clo['url'], **{'max_backoff': 128, **kwargs})
-    if not response_final or response_final.status_code != 200:
-        return None
-
-    return response_final
+    return r_json
